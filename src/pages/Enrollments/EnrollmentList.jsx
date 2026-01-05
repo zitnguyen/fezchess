@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Download, Search, ChevronLeft, ChevronRight, Edit, Trash2, RotateCw } from 'lucide-react';
+import { Plus, Download, Search, ChevronLeft, ChevronRight, Edit, Trash2, RotateCw, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import enrollmentService from '../../services/enrollmentService';
+import financeService from '../../services/financeService';
 
 const EnrollmentList = () => {
     const navigate = useNavigate();
@@ -62,6 +63,19 @@ const EnrollmentList = () => {
         } catch (err) {
             console.error("Error deleting enrollment:", err);
             setError('Lỗi khi xóa bản ghi');
+        }
+    };
+
+    const handlePayment = async (enrollmentId) => {
+        if (!window.confirm("Xác nhận đã thu tiền học phí?")) return;
+        try {
+            await financeService.payTuition(enrollmentId);
+            // Refresh list
+            fetchEnrollments();
+            alert("Đã thanh toán thành công!");
+        } catch (err) {
+            console.error("Error paying tuition", err);
+            setError("Lỗi khi thanh toán: " + err.message);
         }
     };
 
@@ -222,6 +236,20 @@ const EnrollmentList = () => {
                                             >
                                                 <Trash2 size={16} color="#EF4444"/>
                                             </button>
+                                            
+                                            {item.paymentStatus !== 'paid' && (
+                                                <button 
+                                                    onClick={() => handlePayment(item.enrollmentId)}
+                                                    className="btn-icon-outline" 
+                                                    style={{
+                                                        width: '32px', height: '32px', border: 'none', cursor: 'pointer',
+                                                        background: '#F0FDFA'
+                                                    }}
+                                                    title="Thanh toán ngay"
+                                                >
+                                                    <DollarSign size={16} color="#059669"/>
+                                                </button>
+                                            )}
 
                                             {/* Delete Confirmation Popup */}
                                             {deleteConfirm === item._id && (

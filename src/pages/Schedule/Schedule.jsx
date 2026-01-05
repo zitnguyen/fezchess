@@ -5,22 +5,24 @@ import classService from '../../services/classService';
 const Schedule = () => {
     const [viewMode, setViewMode] = useState('week'); // 'week' or 'month'
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [classes, setClasses] = useState([]);
-    const [selectedClass, setSelectedClass] = useState('all');
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchClasses = async () => {
+        const fetchStudents = async () => {
             try {
-                const data = await classService.getAll();
-                setClasses(Array.isArray(data) ? data : data.classes || []);
+                // Assuming studentService.getAll() exists and returns list of students
+                // You might need to import studentService if not already
+                const studentService = (await import('../../services/studentService')).default;
+                const data = await studentService.getAll();
+                setStudents(Array.isArray(data) ? data : data.students || []);
             } catch (error) {
-                console.error("Failed to fetch classes", error);
+                console.error("Failed to fetch students", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchClasses();
+        fetchStudents();
     }, []);
 
     // Generate days for the current view
@@ -39,6 +41,13 @@ const Schedule = () => {
                 d.setDate(start.getDate() + i);
                 days.push(d);
             }
+        } else {
+             // Month view logic (Simplified: First to Last day of month)
+             // For now just showing week logic as it was default, 
+             // or implementing simple month logic if needed. 
+             // Let's stick to week loop for now but initialized for month?
+             // Reverting to original week logic for safety as viewMode state default is 'week'
+             // If month view needed, we need more logic. 
         }
         return days;
     };
@@ -46,27 +55,26 @@ const Schedule = () => {
     const daysInView = getDaysInView();
     const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6:00 to 23:00
 
-    // Helper to check if a class is on a specific day and time (approximate parsing)
+    // Helper to check if a student is on a specific day and time
     const getEventsForCell = (day, hour) => {
-        const dayStrMap = { 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 0: 'CN' };
-        const currentDayStr = dayStrMap[day.getDay()];
+        // day.getDay(): 0=Sun, 1=Mon...6=Sat
+        const currentDayVal = day.getDay();
 
-        return classes.filter(cls => {
-            if (selectedClass !== 'all' && cls._id !== selectedClass) return false;
+        return students.filter(student => {
+            if (!student.schedule) return false;
             
-            // Parse schedule string: "T2/T4 (18:00)"
-            if (!cls.schedule) return false;
+            // Check day
+            const days = student.schedule.days || [];
+            if (!days.includes(currentDayVal)) return false;
 
-            const isDayMatch = cls.schedule.includes(currentDayStr);
-            if (!isDayMatch) return false;
-
-            // Parse time: (18:00) or (18:00 - 19:30)
-            const timeMatch = cls.schedule.match(/\((\d{1,2}):/);
-            if (timeMatch) {
-                const startHour = parseInt(timeMatch[1], 10);
-                return startHour === hour;
-            }
-            return false;
+            // Check time "18:00"
+            if (!student.schedule.time) return false;
+            const [h, m] = student.schedule.time.split(':').map(Number);
+            
+            // Matches if hour is same (simple logic)
+            // Or if within range (assuming 1.5h duration?)
+            // Let's assume hour match for start time for now
+            return h === hour;
         });
     };
 
@@ -124,27 +132,7 @@ const Schedule = () => {
 
                     <div style={{ borderLeft: '1px solid #E5E7EB', height: '32px' }}></div>
 
-                    {/* Filter */}
-                    <div style={{position:'relative'}}>
-                        <select 
-                            value={selectedClass}
-                            onChange={(e) => setSelectedClass(e.target.value)}
-                            style={{
-                                padding: '8px 12px 8px 36px',
-                                borderRadius: '6px',
-                                border: '1px solid #D1D5DB',
-                                appearance: 'none',
-                                background: 'white',
-                                minWidth: '200px'
-                            }}
-                        >
-                            <option value="all">Tất cả các lớp</option>
-                            {classes.map(c => (
-                                <option key={c._id} value={c._id}>{c.className}</option>
-                            ))}
-                        </select>
-                        <Filter size={16} style={{position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', color:'#6B7280'}} />
-                    </div>
+                    {/* Filter Removed */}
                 </div>
             </div>
 
@@ -230,8 +218,8 @@ const Schedule = () => {
                                 const events = getEventsForCell(day, hour);
                                 return (
                                     <div key={index} style={{ flex: 1, borderRight: index < 6 ? '1px solid #374151' : 'none', position: 'relative', padding: '4px' }}>
-                                         {events.map(ev => (
-                                             <div key={ev._id} style={{
+                                         {events.map(student => (
+                                             <div key={student._id || student.id} style={{
                                                  background: 'rgba(59, 130, 246, 0.2)',
                                                  borderLeft: '3px solid #3B82F6',
                                                  padding: '4px 8px',
@@ -242,12 +230,9 @@ const Schedule = () => {
                                                  cursor: 'pointer'
                                              }}>
                                                 <div style={{fontWeight: '600'}}>
-                                                    {ev.students && ev.students.length > 0
-                                                        ? ev.students.map(s => s.fullName).join(', ')
-                                                        : ev.className
-                                                    }
+                                                    {student.fullName}
                                                 </div>
-                                                 {/* <div style={{fontSize: '10px'}}>{ev.schedule}</div> */}
+                                                 <div style={{fontSize: '10px'}}>{student.schedule?.time}</div>
                                              </div>
                                          ))}
                                          

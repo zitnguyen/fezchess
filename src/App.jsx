@@ -15,6 +15,8 @@ import Attendance from './pages/Attendance/Attendance';
 import EnrollmentList from './pages/Enrollments/EnrollmentList';
 import EnrollmentForm from './pages/Enrollments/EnrollmentForm';
 import Schedule from './pages/Schedule/Schedule';
+import ParentList from './pages/Parents/ParentList';
+import ParentForm from './pages/Parents/ParentForm';
 import TeacherLayout from './layouts/TeacherLayout';
 import TeacherDashboard from './pages/TeacherPortal/Dashboard/TeacherDashboard';
 import StudentLayout from './layouts/StudentLayout';
@@ -72,6 +74,27 @@ function App() {
           <ProtectedRoute allowedRoles={['Admin']}>
             <MainLayout>
                <StudentForm />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/parents" element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <MainLayout>
+               <ParentList />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/parents/new" element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <MainLayout>
+               <ParentForm />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/parents/:id" element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <MainLayout>
+               <ParentForm />
             </MainLayout>
           </ProtectedRoute>
         } />

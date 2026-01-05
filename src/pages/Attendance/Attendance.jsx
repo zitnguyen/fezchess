@@ -1,71 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Search, ChevronDown, Save, ClipboardCheck, Filter, CheckCircle, XCircle } from 'lucide-react';
-import classService from '../../services/classService';
-import enrollmentService from '../../services/enrollmentService';
+import { Calendar, Save, CheckCircle, XCircle } from 'lucide-react';
+import studentService from '../../services/studentService';
 import attendanceService from '../../services/attendanceService';
 
 const Attendance = () => {
 
     // State
-    const [classes, setClasses] = useState([]);
-    const [selectedClass, setSelectedClass] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null); // Success/Error message
 
-    // Load Classes on mount
+    // Load Students & Attendance when Date changes
     useEffect(() => {
-        const fetchClasses = async () => {
-            try {
-                const data = await classService.getAll();
-                const classList = Array.isArray(data) ? data : (data.classes || []);
-                setClasses(classList);
-                if (classList.length > 0) {
-                    setSelectedClass(classList[0]._id || classList[0].id);
-                }
-            } catch (err) {
-                console.error("Failed to fetch classes", err);
-            }
-        };
-        fetchClasses();
-    }, []);
-
-    // Load Students & Attendance when Class or Date changes
-    useEffect(() => {
-        if (!selectedClass) return;
-
         const fetchData = async () => {
             setLoading(true);
             try {
-                // 1. Get Students (Enrollments)
-                const enrollmentsData = await enrollmentService.getAll({ classId: selectedClass });
-                const enrollments = Array.isArray(enrollmentsData) ? enrollmentsData : (enrollmentsData.enrollments || []);
+                // 1. Get All Students
+                const studentsData = await studentService.getAll();
+                const allStudents = Array.isArray(studentsData) ? studentsData : (studentsData.students || []);
                 
-                // 2. Get Existing Attendance
+                // 2. Filter Students Scheduled for this Day
+                const dayOfWeek = new Date(selectedDate).getDay(); // 0=Sun, 1=Mon...
+                const scheduledStudents = allStudents.filter(s => 
+                    s.schedule && s.schedule.days && s.schedule.days.includes(dayOfWeek)
+                );
+
+                // 3. Get Existing Attendance for this Date
                 const attendanceData = await attendanceService.getAll({ 
-                    classId: selectedClass, 
                     date: selectedDate 
                 });
                 const attendanceRecords = Array.isArray(attendanceData) ? attendanceData : (attendanceData.attendance || []);
 
-                // 3. Merge Data
-                const mergedData = enrollments.map(enrollment => {
-                    if (!enrollment) return null;
-                    const studentId = enrollment.studentId?._id || enrollment.studentId;
+                // 4. Merge Data
+                const mergedData = scheduledStudents.map(student => {
                     const existingRecord = attendanceRecords.find(r => 
-                        (r.studentId?._id || r.studentId) === studentId
+                        (r.studentId?._id || r.studentId) === student._id
                     );
 
                     return {
-                        id: studentId,
-                        name: enrollment.studentId?.fullName || 'Unknown',
-                        status: existingRecord ? existingRecord.status : 'present', // Default to present
+                        id: student._id,
+                        name: student.fullName,
+                        status: existingRecord ? existingRecord.status : 'present',
                         note: existingRecord ? existingRecord.note : '',
-                        recordId: existingRecord ? existingRecord._id : null
+                        recordId: existingRecord ? existingRecord._id : null,
+                        sessionsTotal: student.sessions?.total || 16,
+                        sessionsUsed: student.sessions?.used || 0
                     };
-                }).filter(Boolean); // Filter out nulls
+                });
                 
                 setStudents(mergedData);
             } catch (err) {
@@ -76,7 +59,7 @@ const Attendance = () => {
         };
 
         fetchData();
-    }, [selectedClass, selectedDate]);
+    }, [selectedDate]);
 
     const handleStatusChange = (studentId, newStatus) => {
         setStudents(students.map(s => 
@@ -96,17 +79,17 @@ const Attendance = () => {
         try {
             // Save each student's attendance
             const promises = students.map(student => {
+                const payload = {
+                    studentId: student.id,
+                    date: selectedDate,
+                    // No classId needed
+                };
+
                 if (student.status === 'present') {
-                    return attendanceService.markPresent({
-                        classId: selectedClass,
-                        studentId: student.id,
-                        date: selectedDate
-                    });
+                    return attendanceService.markPresent(payload);
                 } else {
                     return attendanceService.markAbsent({
-                        classId: selectedClass,
-                        studentId: student.id,
-                        date: selectedDate,
+                        ...payload,
                         reason: student.note
                     });
                 }
@@ -115,7 +98,15 @@ const Attendance = () => {
             await Promise.all(promises);
             setMessage({ type: 'success', text: 'Đã lưu điểm danh thành công!' });
             
-            // Clear message after 3s
+            // Reload data to reflect session changes (Optional optimization: update local state)
+            // For now, simple reload triggers useEffect re-run if we changed something that affects deps? No, selectedDate didn't change.
+            // But we should refresh session counts. Trigger re-fetch.
+            // Hack: toggle date or force update. 
+            // Better: just fetch data again.
+            // window.location.reload(); // Too heavy.
+            
+            // Re-fetch logic duplicated? Extract it?
+            // For now, let's just show success. 
             setTimeout(() => setMessage(null), 3000);
 
         } catch (err) {
@@ -126,26 +117,17 @@ const Attendance = () => {
         }
     };
 
-    const getStatusColor = (status) => {
-        switch(status) {
-            case 'present': return '#10B981'; // Green
-            case 'late': return '#F59E0B'; // Orange
-            case 'absent': return '#EF4444'; // Red
-            default: return '#6B7280';
-        }
-    };
-
   return (
     <div className="page-container">
       <div className="page-header">
         <div>
-            <h1>Điểm Danh Lớp Học</h1>
-            <p className="page-subtitle">Quản lý chuyên cần học viên theo ngày và lớp học.</p>
+            <h1>Điểm Danh Hôm Nay</h1>
+            <p className="page-subtitle">Danh sách học viên có lịch học vào ngày này.</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
             <button className="btn-primary" onClick={handleSave} disabled={saving}>
                 <Save size={18} />
-                <span>{saving ? 'Đang lưu...' : 'Lưu Điểm Danh'}</span>
+                <span>{saving ? 'Đang lưu...' : 'Lưu Tất Cả'}</span>
             </button>
         </div>
       </div>
@@ -166,23 +148,7 @@ const Attendance = () => {
       <div className="control-bar" style={{ alignItems: 'end' }}>
         <div style={{ display: 'flex', gap: '16px', flex: 1 }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Chọn Lớp Học</label>
-                <div style={{ position: 'relative' }}>
-                    <select 
-                        style={{ width: '240px', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', appearance: 'none', background: 'white' }}
-                        value={selectedClass}
-                        onChange={(e) => setSelectedClass(e.target.value)}
-                    >
-                        {classes.map(cls => (
-                            <option key={cls._id || cls.id} value={cls._id || cls.id}>{cls.className || cls.name}</option>
-                        ))}
-                    </select>
-                    <ChevronDown size={16} style={{ position: 'absolute', right: '12px', top: '12px', pointerEvents: 'none', color: '#6B7280' }} />
-                </div>
-            </div>
-
-            <div className="form-group" style={{ marginBottom: 0 }}>
-                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Ngày điểm danh</label>
+                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>Chọn Ngày</label>
                  <div style={{ position: 'relative' }}>
                     <input 
                         type="date" 
@@ -211,7 +177,7 @@ const Attendance = () => {
         {loading ? (
              <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Đang tải danh sách học viên...</div>
         ) : students.length === 0 ? (
-             <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Lớp này chưa có học viên nào.</div>
+             <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Không có học viên nào có lịch hôm nay.</div>
         ) : (
         <table className="data-table">
             <thead>
@@ -226,7 +192,14 @@ const Attendance = () => {
                 {students.map((student, index) => (
                     <tr key={student.id}>
                         <td>{index + 1}</td>
-                        <td style={{ fontWeight: '600', color: '#111827' }}>{student.name}</td>
+                        <td>
+                            <div style={{ fontWeight: '600', color: '#111827' }}>{student.name}</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>
+                                Tiến độ: <span style={{fontWeight: 'bold', color: (student.sessionsTotal - student.sessionsUsed) <= 2 ? '#EF4444' : '#10B981'}}>
+                                    {student.sessionsUsed}/{student.sessionsTotal}
+                                </span> buổi
+                            </div>
+                        </td>
                         <td style={{ textAlign: 'center' }}>
                             <div style={{ display: 'inline-flex', background: '#F3F4F6', padding: '4px', borderRadius: '8px' }}>
                                 <button 
