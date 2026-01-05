@@ -17,12 +17,17 @@ import EnrollmentForm from './pages/Enrollments/EnrollmentForm';
 import Schedule from './pages/Schedule/Schedule';
 import ParentList from './pages/Parents/ParentList';
 import ParentForm from './pages/Parents/ParentForm';
+import ParentLayout from './layouts/ParentLayout';
+import ParentDashboard from './pages/ParentPortal/ParentDashboard';
+import ParentSchedule from './pages/ParentPortal/ParentSchedule';
 import TeacherLayout from './layouts/TeacherLayout';
 import TeacherDashboard from './pages/TeacherPortal/Dashboard/TeacherDashboard';
 import StudentLayout from './layouts/StudentLayout';
 import StudentDashboard from './pages/StudentPortal/Dashboard/StudentDashboard';
 import StudentSchedule from './pages/StudentPortal/Schedule/StudentSchedule';
 import StudentProfile from './pages/StudentPortal/Profile/StudentProfile';
+
+
 import Login from './pages/Login/Login';
 import './App.css';
 
@@ -203,10 +208,24 @@ function App() {
             </ProtectedRoute>
         } />
 
+        {/* Parent Routes */}
+        <Route path="/parent" element={<Navigate to="/parent/dashboard" replace />} />
+        <Route path="/parent/*" element={
+            <ProtectedRoute allowedRoles={['Parent']}>
+                <ParentLayout>
+                    <Routes>
+                        <Route path="dashboard" element={<ParentDashboard />} />
+                        <Route path="schedule" element={<ParentSchedule />} />
+                        <Route path="*" element={<div>Parent Page Coming Soon</div>} />
+                    </Routes>
+                </ParentLayout>
+            </ProtectedRoute>
+        } />
+
         {/* Student Routes */}
         <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
         <Route path="/student/*" element={
-            <ProtectedRoute allowedRoles={['Student', 'Parent']}>
+            <ProtectedRoute allowedRoles={['Student']}>
                 <StudentLayout>
                     <Routes>
                         <Route path="dashboard" element={<StudentDashboard />} />

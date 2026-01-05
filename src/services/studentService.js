@@ -16,6 +16,9 @@ const studentService = {
   delete: (id) => {
     return axiosClient.delete(`/students/${id}`);
   },
+  getByParentId: (parentId) => {
+    return axiosClient.get(`/students/parent/${parentId}`);
+  },
 };
 
 export default studentService;

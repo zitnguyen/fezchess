@@ -23,7 +23,9 @@ const Login = () => {
         navigate('/dashboard');
       } else if (user.role === 'Teacher') {
         navigate('/teacher/dashboard');
-      } else if (user.role === 'Parent' || user.role === 'Student') {
+      } else if (user.role === 'Parent') {
+        navigate('/parent/schedule');
+      } else if (user.role === 'Student') {
         navigate('/student/dashboard');
       } else {
         navigate('/');
