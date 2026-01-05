@@ -154,7 +154,9 @@ const StudentForm = () => {
       navigate("/students");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Lỗi khi lưu dữ liệu");
+      const errorMsg = err.response?.data?.message || JSON.stringify(err.response?.data) || "Lỗi khi lưu dữ liệu";
+      setError(errorMsg);
+      alert(`Lỗi: ${errorMsg}`);
     } finally {
       setSubmitting(false);
     }
