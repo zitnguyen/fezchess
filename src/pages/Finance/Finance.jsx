@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { 
     Download, ChevronDown, Filter, Plus, MoreHorizontal,
     DollarSign, AlertTriangle, ShoppingCart, TrendingUp, TrendingDown,
@@ -8,6 +7,7 @@ import {
 import { 
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import financeService from '../../services/financeService';
 import './Finance.css';
 
 const Finance = () => {
@@ -36,18 +36,17 @@ const Finance = () => {
         try {
             setLoading(true);
             const { month, year } = selectedDate;
-            const query = `?month=${month}&year=${year}`;
             
             const [statsRes, chartRes, costRes, trxRes] = await Promise.all([
-                axios.get(`http://localhost:5000/api/finance/stats${query}`),
-                axios.get(`http://localhost:5000/api/finance/chart${query}`),
-                axios.get(`http://localhost:5000/api/finance/cost-structure${query}`),
-                axios.get(`http://localhost:5000/api/finance/transactions${query}`)
+                financeService.getFinanceStats(month, year),
+                financeService.getFinanceChart(month, year),
+                financeService.getCostStructure(month, year),
+                financeService.getTransactions(month, year)
             ]);
 
             // Transform Stats Data to match UI
-            if (statsRes.data.success) {
-                const rawStats = statsRes.data.data;
+            if (statsRes.success) {
+                const rawStats = statsRes.data;
                 const mappedStats = rawStats.map((item, idx) => {
                     let icon = DollarSign;
                     let color = '#EFF6FF';
@@ -74,20 +73,20 @@ const Finance = () => {
                 setFinancialStats(mappedStats);
             }
 
-            if (chartRes.data.success) {
-                setChartData(chartRes.data.data);
+            if (chartRes.success) {
+                setChartData(chartRes.data);
             }
 
-            if (costRes.data.success) {
-                    const formattedCost = costRes.data.data.map(item => ({
+            if (costRes.success) {
+                    const formattedCost = costRes.data.map(item => ({
                     ...item,
                     value: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.value)
                     }));
                 setCostStructure(formattedCost);
             }
 
-            if (trxRes.data.success) {
-                const formattedTrx = trxRes.data.data.map(trx => ({
+            if (trxRes.success) {
+                const formattedTrx = trxRes.data.map(trx => ({
                     ...trx,
                     amount: (trx.type === 'income' ? '+' : '-') + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(trx.amount),
                     date: new Date(trx.date).toLocaleDateString('vi-VN')
@@ -113,7 +112,7 @@ const Finance = () => {
 
     const handleExport = () => {
         const { month, year } = selectedDate;
-        window.open(`http://localhost:5000/api/finance/export?month=${month}&year=${year}`, '_blank');
+        financeService.exportFinanceReport(month, year);
     };
 
     // Generate last 12 months for dropdown
@@ -136,10 +135,10 @@ const Finance = () => {
             };
             
             if (editingId) {
-                 await axios.put(`http://localhost:5000/api/finance/transactions/${editingId}`, payload);
+                 await financeService.updateTransaction(editingId, payload);
                  alert("Cập nhật giao dịch thành công");
             } else {
-                 await axios.post('http://localhost:5000/api/finance/transactions', payload);
+                 await financeService.createTransaction(payload);
                  alert("Thêm giao dịch thành công");
             }
             
@@ -187,9 +186,7 @@ const Finance = () => {
         }
         // Confirmation handled by UI popup
         try {
-            await axios.delete(`http://localhost:5000/api/finance/transactions/${id}`);
-            // alert('Xóa giao dịch thành công'); // Optional, removed to be smoother or keep it? Other lists log it. I'll keep generic alert or remove.
-            // keeping alert for feedback consistency with others? others log. TeacherList setsTeachers.
+            await financeService.deleteTransaction(id);
             setDeleteConfirm(null);
             fetchAllData();
             alert('Xóa giao dịch thành công');

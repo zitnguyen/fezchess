@@ -4,9 +4,6 @@ import {
   Users,
   BookOpen,
   DollarSign,
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreHorizontal,
   UserPlus
 } from "lucide-react";
 import {
@@ -24,6 +21,7 @@ import axios from 'axios';
 import studentService from "../../services/studentService";
 import classService from "../../services/classService";
 import enrollmentService from "../../services/enrollmentService";
+import financeService from "../../services/financeService";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -60,11 +58,9 @@ const Dashboard = () => {
       const lastMonth = lastMonthDate.getMonth();
       const lastMonthYear = lastMonthDate.getFullYear();
 
-      // Calc Student Growth (Total count logic remains same as it's typically user base growth)
-      // Or should this also be based on Enrollment? usually "Students" means User Base. 
-      // User likely meant "Enrollment" for the "New Registrations" part.
+      // Calc Student Growth
       const studentsPriorToThisMonth = students.filter(s => {
-          if (!s.enrollmentDate) return false; // assuming this is join date
+          if (!s.enrollmentDate) return false;
           const d = new Date(s.enrollmentDate);
           return d < new Date(thisYear, thisMonth, 1);
       }).length;
@@ -76,10 +72,9 @@ const Dashboard = () => {
           setStudentGrowth(students.length > 0 ? "+100%" : "0%");
       }
 
-      // 2. Fetch Enrollments for "New Enrollments" stats and Table
+      // 2. Fetch Enrollments
       const enrollments = await enrollmentService.getAll();
       
-      // Calculate Enrollment Growth (This Month vs Last Month)
       const enrollmentsThisMonth = enrollments.filter(e => {
           const d = new Date(e.enrollmentDate);
           return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
@@ -107,7 +102,7 @@ const Dashboard = () => {
       setRecentEnrollments(recentEnr.slice(0, 5));
 
 
-      // 3. Process Level Data (from Students)
+      // 3. Process Level Data
       if (students.length > 0) {
         const levels = { 'Cơ bản': 0, 'Trung cấp': 0, 'Nâng cao': 0 };
         students.forEach(s => {
@@ -149,17 +144,16 @@ const Dashboard = () => {
           setClassGrowth(classesNewThisMonth > 0 ? "+100%" : "0%");
       }
 
-      // 5. Finance
-      // Fetch total revenue and Chart Data
-      const financeStatsRes = await axios.get('http://localhost:5000/api/finance/stats');
-      if (financeStatsRes.data.success && financeStatsRes.data.data.length > 0) {
-          setTotalRevenue(financeStatsRes.data.data[0].value);
-          setRevenueGrowth(financeStatsRes.data.data[0].change);
+      // 5. Finance Stats & Chart via Service
+      const financeStatsRes = await financeService.getFinanceStats();
+      if (financeStatsRes.success && financeStatsRes.data.length > 0) {
+          setTotalRevenue(financeStatsRes.data[0].value);
+          setRevenueGrowth(financeStatsRes.data[0].change);
       }
 
-      const financeChartRes = await axios.get('http://localhost:5000/api/finance/chart');
-      if (financeChartRes.data.success) {
-          const mappedChartData = financeChartRes.data.data.map(item => ({
+      const financeChartRes = await financeService.getFinanceChart();
+      if (financeChartRes.success) {
+          const mappedChartData = financeChartRes.data.map(item => ({
               name: item.name,
               value: item.income
           }));

@@ -159,34 +159,33 @@ const Schedule = () => {
             {/* Calendar Grid */}
             <div style={{ 
                 flex: 1, 
-                background: '#1F2937', // Dark background as per image
+                background: '#FFFFFF', 
                 borderRadius: '12px', 
-                border: '1px solid #374151',
+                border: '2px solid #000000', // Black border as requested
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column',
-                color: '#E5E7EB'
+                color: '#000000'
             }}>
                 {/* Header Row */}
-                <div style={{ display: 'flex', borderBottom: '1px solid #374151' }}>
-                    <div style={{ width: '60px', borderRight: '1px solid #374151', flexShrink: 0 }}></div>
+                <div style={{ display: 'flex', borderBottom: '2px solid #000000' }}>
+                    <div style={{ width: '80px', borderRight: '1px solid #000000', flexShrink: 0, padding: '12px', fontWeight: 'bold', textAlign: 'center' }}>
+                        THỜI GIAN
+                    </div>
                     {daysInView.map((day, index) => {
                         const isToday = new Date().toDateString() === day.toDateString();
+                        // Check if this day has ANY events
+                        // Not strictly requested to hide empty DAY columns but to hide empty "slots". 
+                        // Keeping 7 days structure is safer for "Calendar".
                         return (
-                             <div key={index} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: index < 6 ? '1px solid #374151' : 'none' }}>
-                                <div style={{ fontSize: '14px', fontWeight: '500', color: '#9CA3AF', marginBottom: '4px' }}>
-                                    {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][day.getDay()]}
+                             <div key={index} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRight: index < 6 ? '1px solid #000000' : 'none', background: isToday ? '#EFF6FF' : 'white' }}>
+                                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#374151', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    {['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][day.getDay()]}
                                 </div>
                                 <div style={{ 
                                     fontSize: '24px', 
                                     fontWeight: 'bold', 
-                                    width: '36px', 
-                                    height: '36px', 
-                                    lineHeight: '36px',
-                                    borderRadius: '50%',
-                                    background: isToday ? '#2563EB' : 'transparent',
-                                    color: isToday ? 'white' : '#F3F4F6',
-                                    margin: '0 auto'
+                                    color: isToday ? '#2563EB' : '#111827',
                                 }}>
                                     {day.getDate()}
                                 </div>
@@ -195,54 +194,113 @@ const Schedule = () => {
                     })}
                 </div>
 
-                {/* Body - Scrollable */}
+                {/* Body - Auto Height based on content */}
                 <div style={{ flex: 1, overflowY: 'auto' }}>
-                    {hours.map((hour) => (
-                        <div key={hour} style={{ display: 'flex', minHeight: '80px', borderBottom: '1px solid #374151' }}>
-                            {/* Time Column */}
-                            <div style={{ 
-                                width: '60px', 
-                                borderRight: '1px solid #374151', 
-                                flexShrink: 0,
-                                padding: '8px',
-                                textAlign: 'center',
-                                fontSize: '12px',
-                                color: '#9CA3AF',
-                                position: 'relative'
-                            }}>
-                                {hour.toString().padStart(2, '0')}:00
-                            </div>
+                    {(() => {
+                        // 1. Calculate Active Hours from Students schedules
+                        const activeHoursSet = new Set();
+                        students.forEach(s => {
+                            if (s.schedule) {
+                                // Support new 'slots' format
+                                if (s.schedule.slots && s.schedule.slots.length > 0) {
+                                    s.schedule.slots.forEach(slot => {
+                                        if (slot.time) {
+                                            const [h] = slot.time.split(':').map(Number);
+                                            if (!isNaN(h)) activeHoursSet.add(h);
+                                        }
+                                    });
+                                } 
+                                // Support legacy 'time' format
+                                else if (s.schedule.time) {
+                                    const [h] = s.schedule.time.split(':').map(Number);
+                                    if (!isNaN(h)) activeHoursSet.add(h);
+                                }
+                            }
+                        });
+                        
+                        let activeHours = Array.from(activeHoursSet).sort((a, b) => a - b);
 
-                            {/* Day Cells */}
-                            {daysInView.map((day, index) => {
-                                const events = getEventsForCell(day, hour);
-                                return (
-                                    <div key={index} style={{ flex: 1, borderRight: index < 6 ? '1px solid #374151' : 'none', position: 'relative', padding: '4px' }}>
-                                         {events.map(student => (
-                                             <div key={student._id || student.id} style={{
-                                                 background: 'rgba(59, 130, 246, 0.2)',
-                                                 borderLeft: '3px solid #3B82F6',
-                                                 padding: '4px 8px',
-                                                 borderRadius: '4px',
-                                                 fontSize: '12px',
-                                                 color: '#93C5FD',
-                                                 marginBottom: '4px',
-                                                 cursor: 'pointer'
-                                             }}>
-                                                <div style={{fontWeight: '600'}}>
-                                                    {student.fullName}
-                                                </div>
-                                                 <div style={{fontSize: '10px'}}>{student.schedule?.time}</div>
-                                             </div>
-                                         ))}
-                                         
-                                         {/* Red line for current time - approximate */}
-                                         {/* Logic for red line would go here if needed */}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
+                        if (activeHours.length === 0) {
+                            return (
+                                <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                                    Chưa có lịch học nào.
+                                </div>
+                            );
+                        }
+
+                        // Helper to filter students for a cell
+                        const getEventsForCell = (day, hour) => {
+                            const currentDayVal = day.getDay();
+                            
+                            return students.filter(student => {
+                                if (!student.schedule) return false;
+                                
+                                // New Format: Slots
+                                if (student.schedule.slots && student.schedule.slots.length > 0) {
+                                    return student.schedule.slots.some(slot => {
+                                        if (slot.day !== currentDayVal) return false;
+                                        const [h] = slot.time.split(':').map(Number);
+                                        return h === hour;
+                                    });
+                                }
+                                
+                                // Legacy Format
+                                const days = student.schedule.days || [];
+                                if (!days.includes(currentDayVal)) return false;
+                                const time = student.schedule.time;
+                                if (!time) return false;
+                                const [h] = time.split(':').map(Number);
+                                return h === hour;
+                            });
+                        };
+
+                        return activeHours.map((hour) => (
+                            <div key={hour} style={{ display: 'flex', minHeight: '100px', borderBottom: '1px solid #000000' }}>
+                                {/* Time Column */}
+                                <div style={{ 
+                                    width: '80px', 
+                                    borderRight: '1px solid #000000', 
+                                    flexShrink: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 'bold',
+                                    fontSize: '16px',
+                                    background: '#F9FAFB'
+                                }}>
+                                    {hour.toString().padStart(2, '0')}:00
+                                </div>
+
+                                {/* Day Cells */}
+                                {daysInView.map((day, index) => {
+                                    const events = getEventsForCell(day, hour);
+                                    return (
+                                        <div key={index} style={{ 
+                                            flex: 1, 
+                                            borderRight: index < 6 ? '1px solid #000000' : 'none', 
+                                            padding: '8px',
+                                            background: events.length > 0 ? '#F0FDF4' : 'white' 
+                                        }}>
+                                             {events.map(student => (
+                                                 <div key={student._id || student.id} style={{
+                                                     background: 'white',
+                                                     border: '1px solid #000000',
+                                                     padding: '8px',
+                                                     borderRadius: '4px',
+                                                     marginBottom: '8px',
+                                                     boxShadow: '2px 2px 0px #000000' 
+                                                 }}>
+                                                    <div style={{fontWeight: 'bold'}}>
+                                                        {student.fullName}
+                                                    </div>
+                                                 </div>
+                                             ))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ));
+                    })()}
                 </div>
             </div>
         </div>

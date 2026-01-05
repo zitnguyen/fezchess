@@ -267,3 +267,140 @@ a {
     color: var(--status-gray-text);
 }
 
+/* --- Mobile Responsive Global Overrides --- */
+@media (max-width: 768px) {
+    /* 1. Page Header - Minimal & Clean */
+    .page-header {
+        flex-direction: row; 
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .page-header > div:first-child {
+        flex: 1; 
+        overflow: hidden; /* Prevent text overflow */
+    }
+    
+    .page-header h1 {
+        font-size: 18px; 
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .page-subtitle {
+        display: none; /* Hide subtitle for cleaner look */
+    }
+
+    /* 2. Control Bar - Modern "App-like" Row */
+    .control-bar {
+        padding: 0; /* Remove padding */
+        background: transparent; /* Remove background box */
+        border: none;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Search Box - Full Width but cleaner */
+    .search-box {
+        width: 100%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .search-box input {
+        border: none;
+        background: white;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    /* Filters - Horizontal Scroll (Stories/Tags style) */
+    .filters {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px; /* Space for scrollbar if any */
+        gap: 8px;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+        /* Hide scrollbar for cleaner look */
+        scrollbar-width: none; 
+    }
+    
+    .filters::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .dropdown {
+        min-width: auto;
+        white-space: nowrap;
+        padding: 8px 16px;
+        background: white;
+        border-radius: 20px; /* Pill shape */
+        border: 1px solid #E5E7EB;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        font-size: 13px;
+        flex-shrink: 0; /* Prevent shrinking */
+    }
+
+    /* 3. Table - Clean Card-like Container */
+    .table-container {
+        background: transparent; /* Blend in */
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow-x: auto;
+        margin: 0 -16px; /* Full width edge-to-edge */
+    }
+    
+    .data-table {
+        min-width: 100%; /* Allow natural width */
+        border-collapse: separate; 
+        border-spacing: 0 8px; /* Spacing between "row cards" if we decide to cardify, but here separate rows */
+    }
+    
+    .data-table thead {
+        display: none; /* Hide headers for a list-view feel? Or keep but small? Let's hide for now or keep standard? 
+           If we hide headers, we need row labels. 
+           Let's KEEP headers but make them minimal. 
+        */
+        /* Actually, horizontal scroll table needs headers. Let's keep headers. */
+    }
+    
+    .data-table tbody tr {
+        background: white;
+        /* box-shadow: 0 1px 2px rgba(0,0,0,0.05); */
+    }
+    
+    /* Sticky First Column for usability? Complex. 
+       Let's just keep simple horizontal scroll with white background rows. 
+    */
+    .data-table th, .data-table td {
+        background: white;
+        padding: 12px 16px;
+        font-size: 13px;
+        border-bottom: 1px solid #F3F4F6;
+        white-space: nowrap;
+    }
+    
+    .data-table th:first-child, .data-table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        border-right: 2px solid #F3F4F6; /* Divider */
+    }
+    
+    .data-table th:first-child {
+        z-index: 20; /* Higher than td */
+    }
+
+    /* 4. Spacing */
+    .page-container {
+        gap: 12px;
+        padding-bottom: 24px;
+    }
+}
+

@@ -13,21 +13,43 @@ const MainLayout = ({ children }) => {
         {/* Mobile Header Trigger */}
         <div style={{ 
             display: 'none', // Hidden on desktop
-            padding: '16px', 
+            padding: '12px 16px', 
             background: 'white', 
             borderBottom: '1px solid #E5E7EB',
             alignItems: 'center',
-            gap: '12px'
+            justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
         }} className="mobile-header">
-            <button 
-                onClick={() => setIsSidebarOpen(true)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
-            >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 12h18M3 6h18M3 18h18" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-            </button>
-            <span style={{ fontWeight: 'bold', fontSize: '18px' }}>Z CHESS</span>
+            <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+                <button 
+                    onClick={() => setIsSidebarOpen(true)}
+                    style={{ 
+                        background: 'transparent', 
+                        border: 'none', 
+                        cursor: 'pointer', 
+                        padding: '8px', 
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#374151'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#F3F4F6'}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                    <span style={{ fontSize: '20px' }}>♟️</span>
+                    <span style={{ fontWeight: '700', fontSize: '18px', color: '#111827' }}>Z CHESS</span>
+                </div>
+            </div>
+            {/* Optional: Add user avatar or notification icon here for mobile */}
         </div>
 
         <TopBar />

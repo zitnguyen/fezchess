@@ -23,9 +23,15 @@ const Attendance = () => {
                 
                 // 2. Filter Students Scheduled for this Day
                 const dayOfWeek = new Date(selectedDate).getDay(); // 0=Sun, 1=Mon...
-                const scheduledStudents = allStudents.filter(s => 
-                    s.schedule && s.schedule.days && s.schedule.days.includes(dayOfWeek)
-                );
+                const scheduledStudents = allStudents.filter(s => {
+                    if (!s.schedule) return false;
+                    // Check slots first (new format)
+                    if (s.schedule.slots && s.schedule.slots.length > 0) {
+                        return s.schedule.slots.some(slot => slot.day === dayOfWeek);
+                    }
+                    // Fallback to legacy
+                    return s.schedule.days && s.schedule.days.includes(dayOfWeek);
+                });
 
                 // 3. Get Existing Attendance for this Date
                 const attendanceData = await attendanceService.getAll({ 

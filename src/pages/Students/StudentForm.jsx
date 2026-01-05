@@ -27,8 +27,8 @@ const StudentForm = () => {
     parentEmail: "",
     
     // Schedule (Direct)
-    scheduleDays: [], // [1, 3] for Mon, Wed
-    scheduleTime: "18:00",
+    scheduleDays: [], 
+    scheduleTimes: {}, // { 1: "18:00", 3: "19:30" }
     sessionsTotal: 16
   });
 
@@ -42,6 +42,25 @@ const StudentForm = () => {
     try {
       setLoading(true);
       const res = await studentService.getById(id);
+      
+      // Parse Schedule Logic
+      let days = [];
+      let times = {};
+      
+      if (res.schedule && res.schedule.slots && res.schedule.slots.length > 0) {
+          // New Format
+          res.schedule.slots.forEach(slot => {
+              days.push(slot.day);
+              times[slot.day] = slot.time;
+          });
+      } else if (res.schedule && res.schedule.days) {
+          // Legacy Format Fallback
+          days = res.schedule.days || [];
+          days.forEach(d => {
+              times[d] = res.schedule.time || "18:00";
+          });
+      }
+
       setFormData({
         fullName: res.fullName || "",
         dateOfBirth: res.dateOfBirth ? res.dateOfBirth.split("T")[0] : "",
@@ -55,8 +74,8 @@ const StudentForm = () => {
         parentEmail: res.parentId?.email || "",
         
         // Map schedule
-        scheduleDays: res.schedule?.days || [],
-        scheduleTime: res.schedule?.time || "18:00",
+        scheduleDays: days,
+        scheduleTimes: times,
         sessionsTotal: res.sessions?.total || 16
       });
     } catch (err) {
@@ -74,11 +93,33 @@ const StudentForm = () => {
   
   const handleDayToggle = (dayVal) => {
       setFormData(prev => {
-          const days = prev.scheduleDays.includes(dayVal)
-            ? prev.scheduleDays.filter(d => d !== dayVal)
-            : [...prev.scheduleDays, dayVal].sort();
-          return { ...prev, scheduleDays: days };
+          const exists = prev.scheduleDays.includes(dayVal);
+          let newDays = exists 
+             ? prev.scheduleDays.filter(d => d !== dayVal)
+             : [...prev.scheduleDays, dayVal].sort();
+          
+          let newTimes = { ...prev.scheduleTimes };
+          if (!exists && !newTimes[dayVal]) {
+              // Default time for new day (copy from first existing or default 18:00)
+              const firstKey = Object.keys(newTimes)[0];
+              newTimes[dayVal] = firstKey ? newTimes[firstKey] : "18:00";
+          }
+          if (exists) {
+              delete newTimes[dayVal];
+          }
+
+          return { ...prev, scheduleDays: newDays, scheduleTimes: newTimes };
       });
+  };
+
+  const handleTimeChange = (day, time) => {
+      setFormData(prev => ({
+          ...prev,
+          scheduleTimes: {
+              ...prev.scheduleTimes,
+              [day]: time
+          }
+      }));
   };
 
   const handleSubmit = async (e) => {
@@ -90,13 +131,24 @@ const StudentForm = () => {
     if (!formData.parentPhone) return setError("Vui lòng nhập SĐT phụ huynh");
     if (formData.scheduleDays.length === 0) return setError("Vui lòng chọn ít nhất 1 buổi học");
 
+    // Construct slots
+    const scheduleSlots = formData.scheduleDays.map(d => ({
+        day: d,
+        time: formData.scheduleTimes[d] || "18:00"
+    }));
+
+    const payload = { ...formData, scheduleSlots };
+    // Remove temp fields
+    delete payload.scheduleDays;
+    delete payload.scheduleTimes;
+
     try {
       setSubmitting(true);
       if (isEditMode) {
-        await studentService.update(id, formData);
+        await studentService.update(id, payload);
         alert("Cập nhật thành công!");
       } else {
-        await studentService.create(formData);
+        await studentService.create(payload);
         alert("Thêm học viên thành công!");
       }
       navigate("/students");
@@ -148,20 +200,22 @@ const StudentForm = () => {
               <label className="form-label">Họ tên học viên <span style={{color:'red'}}>*</span></label>
               <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required className="form-input" placeholder="Nguyễn Văn A" />
             </div>
-            
-            <div>
-              <label className="form-label">Mã học viên</label>
-              <input type="text" disabled value={isEditMode ? formData.studentId : "Tự động sinh (VD: 1001)"} className="form-input" style={{background: '#F3F4F6', color: '#6B7280'}} />
-            </div>
 
             <div>
               <label className="form-label">Ngày sinh</label>
               <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="form-input" />
             </div>
             
-             <div>
+             <div style={{ gridColumn: "span 2" }}>
               <label className="form-label">Trình độ</label>
-              <input type="text" name="skillLevel" value={formData.skillLevel} onChange={handleChange} className="form-input" placeholder="Nhập môn / Cơ bản..." />
+              <select name="skillLevel" value={formData.skillLevel} onChange={handleChange} className="form-input">
+                  <option value="">-- Chọn trình độ --</option>
+                  <option value="Kid 1">Kid 1</option>
+                  <option value="Kid 2">Kid 2</option>
+                  {[...Array(10)].map((_, i) => (
+                      <option key={i+1} value={`Level ${i+1}`}>Level {i+1}</option>
+                  ))}
+              </select>
             </div>
 
             {/* --- SECTION 2: PHỤ HUYNH --- */}
@@ -192,7 +246,7 @@ const StudentForm = () => {
                 <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
                     <div style={{ flex: 1 }}>
                         <label className="form-label" style={{marginBottom: "12px"}}>Chọn lịch học trong tuần <span style={{color:'red'}}>*</span></label>
-                        <div style={{ display: "flex", gap: "8px" }}>
+                        <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
                              {[ {l:"CN",v:0}, {l:"T2",v:1}, {l:"T3",v:2}, {l:"T4",v:3}, {l:"T5",v:4}, {l:"T6",v:5}, {l:"T7",v:6} ].map(d => (
                                  <div 
                                     key={d.v}
@@ -213,19 +267,31 @@ const StudentForm = () => {
                                  </div>
                              ))}
                         </div>
+
+                        {/* Validated Time Inputs per Selected Day */}
+                        {formData.scheduleDays.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                                {formData.scheduleDays.map(day => (
+                                    <div key={day} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '8px', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
+                                        <span style={{ fontWeight: '600', fontSize: '13px', width: '40px' }}>
+                                            {['CN','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'][day]}:
+                                        </span>
+                                        <input 
+                                            type="time" 
+                                            value={formData.scheduleTimes[day] || "18:00"} 
+                                            onChange={(e) => handleTimeChange(day, e.target.value)}
+                                            style={{ border: '1px solid #D1D5DB', borderRadius: '4px', padding: '4px', fontSize: '13px' }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     
-                    <div>
-                        <label className="form-label">Giờ học</label>
-                        <div className="input-with-icon">
-                            <Clock size={18} color="#6B7280" />
-                            <input type="time" name="scheduleTime" value={formData.scheduleTime} onChange={handleChange} className="form-input" style={{width: "140px"}} />
-                        </div>
-                    </div>
-                    
-                    <div>
+                    <div style={{ width: "200px" }}>
                          <label className="form-label">Tổng số buổi</label>
-                         <input type="number" name="sessionsTotal" value={formData.sessionsTotal} onChange={handleChange} className="form-input" style={{width: "100px"}} />
+                         <input type="number" name="sessionsTotal" value={formData.sessionsTotal} onChange={handleChange} className="form-input" />
+                         <p style={{fontSize:'12px', color:'#6B7280', marginTop:'4px'}}>Dùng để theo dõi học phí</p>
                     </div>
                 </div>
             </div>
