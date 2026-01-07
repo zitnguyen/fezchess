@@ -117,11 +117,8 @@ const StudentList = () => {
         return csvContent;
     };
 
-    // Pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+    // Pagination logic removed, showing all students
+    const currentItems = filteredStudents;
 
   return (
     <div className="page-container">
@@ -332,40 +329,9 @@ const StudentList = () => {
             </table>
             )}
             
-           {!loading && filteredStudents.length > 0 && (
-                 <div className="pagination">
-                    <div style={{fontSize: '14px', color: '#6B7280'}}>
-                        Hiển thị <strong>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredStudents.length)}</strong> trong <strong>{filteredStudents.length}</strong> học viên
-                    </div>
-                    <div className="pagination-controls">
-                        <button 
-                            className="page-btn"
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <ChevronLeft size={16} />
-                            Trước
-                        </button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button 
-                                key={i + 1}
-                                className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
-                                onClick={() => setCurrentPage(i + 1)}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
-                        <button 
-                            className="page-btn"
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                        >
-                            Sau
-                            <ChevronRight size={16} />
-                        </button>
-                    </div>
-                </div>
-            )}
+
+            {/* Pagination removed as per user request */}
+
         </div>
     </div>
   );

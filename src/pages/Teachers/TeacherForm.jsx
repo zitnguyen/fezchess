@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import teacherService from '../../services/teacherService';
 
 const TeacherForm = () => {
@@ -157,16 +157,7 @@ const TeacherForm = () => {
                         </p>
                     </div>
                 </div>
-                <button
-                    onClick={() => formRef.current?.requestSubmit()}
-                    disabled={submitting}
-                    className="btn-primary"
-                    style={{ display: 'inline-flex', gap: '8px' }}
-                    type="button"
-                >
-                    <Save size={18} />
-                    <span>{submitting ? 'Đang lưu...' : 'Lưu'}</span>
-                </button>
+
             </div>
 
             {error && (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, Users, FileText, AlertCircle, Clock, CheckCircle, Plus } from 'lucide-react';
-import './TeacherDashboard.css';
+
 
 const TeacherDashboard = () => {
   const nextClass = {

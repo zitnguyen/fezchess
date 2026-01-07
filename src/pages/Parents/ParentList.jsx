@@ -27,7 +27,7 @@ const ParentList = () => {
   const handleDelete = async (id) => {
       if(window.confirm("Bạn có chắc chắn muốn xóa phụ huynh này?")) {
           try {
-              await parentService.remove(id);
+              await parentService.delete(id);
               fetchParents();
           } catch (error) {
               console.error("Error deleting parent:", error);

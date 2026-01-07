@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import classService from "../../services/classService";
-import courseService from "../../services/courseService";
+// import courseService from "../../services/courseService";
 import teacherService from "../../services/teacherService";
 import studentService from "../../services/studentService";
 
@@ -107,7 +107,7 @@ const ClassForm = () => {
   const [error, setError] = useState(null);
   
   // Auxiliary data
-  const [courses, setCourses] = useState([]);
+  // const [courses, setCourses] = useState([]); // Removed
   const [teachers, setTeachers] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -115,7 +115,14 @@ const ClassForm = () => {
   const [formData, setFormData] = useState({
     classId: "",
     className: "",
-    courseId: "",
+    // courseId: "", // Removed
+    description: "",
+    fee: 1500000,
+    level: "Beginner",
+    maxStudents: 15,
+    totalSessions: 16,
+    durationWeeks: 12,
+    
     teacherId: "",
     startDate: "",
     schedule: "",
@@ -131,12 +138,12 @@ const ClassForm = () => {
 
   const fetchAuxData = async () => {
     try {
-        const [coursesData, teachersData, studentsData] = await Promise.all([
-            courseService.getAll(),
+        const [teachersData, studentsData] = await Promise.all([
+            // courseService.getAll(),
             teacherService.getAll(),
             studentService.getAll()
         ]);
-        setCourses(Array.isArray(coursesData) ? coursesData : coursesData.courses || []);
+        // setCourses(Array.isArray(coursesData) ? coursesData : coursesData.courses || []);
         setTeachers(Array.isArray(teachersData) ? teachersData : teachersData.users || []);
         setAllStudents(Array.isArray(studentsData) ? studentsData : studentsData || []);
     } catch (err) {
@@ -151,7 +158,14 @@ const ClassForm = () => {
       setFormData({
         classId: response.classId || "",
         className: response.className || "",
-        courseId: response.courseId?._id || response.courseId || "",
+        // courseId removed
+        description: response.description || "",
+        fee: response.fee || 1500000,
+        level: response.level || "Beginner",
+        maxStudents: response.maxStudents || 15,
+        totalSessions: response.totalSessions || 16,
+        durationWeeks: response.durationWeeks || 12,
+
         teacherId: response.teacherId?._id || response.teacherId || "",
         startDate: response.startDate ? response.startDate.split("T")[0] : "",
         schedule: response.schedule || "",
@@ -179,8 +193,8 @@ const ClassForm = () => {
     setError(null);
 
     // Validation
-    if (!formData.classId || !formData.className || !formData.courseId) {
-        setError("Vui lòng điền các trường bắt buộc (ID, Tên lớp, Khóa học)");
+    if (!formData.classId || !formData.className) {
+        setError("Vui lòng điền các trường bắt buộc (ID, Tên lớp)");
         return;
     }
 
@@ -246,15 +260,36 @@ const ClassForm = () => {
               <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Tên Lớp *</label>
               <input type="text" name="className" value={formData.className} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} required />
             </div>
-            {/* Course */}
+            {/* Course Fields Replacement */}
             <div>
-              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Khóa Học *</label>
-              <select name="courseId" value={formData.courseId} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} required>
-                 <option value="">-- Chọn Khóa Học --</option>
-                 {courses.map(c => (
-                     <option key={c._id} value={c._id}>{c.courseName}</option>
-                 ))}
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Cấp Độ</label>
+              <select name="level" value={formData.level} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }}>
+                  <option value="Beginner">Nhập môn (Beginner)</option>
+                  <option value="Basic">Cơ bản (Basic)</option>
+                  <option value="Intermediate">Trung cấp (Intermediate)</option>
+                  <option value="Advanced">Nâng cao (Advanced)</option>
+                  <option value="Master">Master</option>
               </select>
+            </div>
+             <div>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Học Phí (VND)</label>
+              <input type="number" name="fee" value={formData.fee} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Sĩ Số Tối Đa</label>
+              <input type="number" name="maxStudents" value={formData.maxStudents} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Tổng Số Buổi</label>
+              <input type="number" name="totalSessions" value={formData.totalSessions} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Thời Lượng (Tuần)</label>
+              <input type="number" name="durationWeeks" value={formData.durationWeeks} onChange={handleChange} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} />
+            </div>
+             <div style={{gridColumn: 'span 2'}}>
+              <label style={{ display: "block", marginBottom: "6px", fontWeight: "500", fontSize: "14px" }}>Mô Tả</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} rows={3} style={{ width: "100%", padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: "6px" }} />
             </div>
              {/* Teacher */}
              <div>

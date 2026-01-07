@@ -8,7 +8,7 @@ import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import financeService from '../../services/financeService';
-import './Finance.css';
+
 
 const Finance = () => {
     const [financialStats, setFinancialStats] = useState([]);

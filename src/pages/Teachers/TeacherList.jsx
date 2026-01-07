@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Download, Search, ChevronDown, ChevronLeft, ChevronRight, Edit, Trash2, RotateCw } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import teacherService from '../../services/teacherService';
-import './TeacherList.css';
+
 
 const TeacherList = () => {
     const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Calendar, BookOpen, Wallet, UserCircle, LogOut } from 'lucide-react';
 import authService from '../../services/authService';
-import '../Sidebar/Sidebar.css'; // Reusing existing sidebar styles
+
 
 const StudentSidebar = () => {
   const navigate = useNavigate();

@@ -132,7 +132,7 @@ const ClassList = () => {
                                 <div>
                                     <div style={{fontWeight: '600', color: '#111827'}}>{cls.className}</div>
                                     <div style={{fontSize: '12px', color: '#6B7280'}}>
-                                        #{cls.courseId?.courseName || '---'} | ID: {cls.classId}
+                                        #{cls.level || '---'} | ID: {cls.classId}
                                     </div>
                                 </div>
                             </td>
@@ -161,14 +161,14 @@ const ClassList = () => {
                             <td>
                                 <div style={{width: '120px'}}>
                                     <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px'}}>
-                                        <span style={{fontWeight: '600', color: '#374151'}}>{cls.currentStudents || 0} <span style={{fontWeight: '400', color: '#9CA3AF'}}>/ {cls.courseId?.maxStudents || 20}</span></span>
+                                        <span style={{fontWeight: '600', color: '#374151'}}>{cls.currentStudents || 0} <span style={{fontWeight: '400', color: '#9CA3AF'}}>/ {cls.maxStudents || 20}</span></span>
                                         <Users size={14} color="#9CA3AF"/>
                                     </div>
                                     <div style={{width: '100%', height: '6px', background: '#F3F4F6', borderRadius: '4px', overflow: 'hidden'}}>
                                         <div style={{
-                                            width: `${Math.min(((cls.currentStudents || 0) / (cls.courseId?.maxStudents || 20)) * 100, 100)}%`,
+                                            width: `${Math.min(((cls.currentStudents || 0) / (cls.maxStudents || 20)) * 100, 100)}%`,
                                             height: '100%',
-                                            background: getProgressColor(cls.currentStudents || 0, cls.courseId?.maxStudents || 20),
+                                            background: getProgressColor(cls.currentStudents || 0, cls.maxStudents || 20),
                                             borderRadius: '4px'
                                         }}></div>
                                     </div>

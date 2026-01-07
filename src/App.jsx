@@ -8,8 +8,7 @@ import StudentList from './pages/Students/StudentList';
 import StudentForm from './pages/Students/StudentForm';
 import ClassList from './pages/Classes/ClassList';
 import ClassForm from './pages/Classes/ClassForm';
-import CourseList from './pages/Courses/CourseList';
-import CourseForm from './pages/Courses/CourseForm';
+
 import Finance from './pages/Finance/Finance';
 import Attendance from './pages/Attendance/Attendance';
 import EnrollmentList from './pages/Enrollments/EnrollmentList';
@@ -29,7 +28,7 @@ import StudentProfile from './pages/StudentPortal/Profile/StudentProfile';
 
 
 import Login from './pages/Login/Login';
-import './App.css';
+
 
 function App() {
   return (
@@ -131,27 +130,7 @@ function App() {
             </MainLayout>
           </ProtectedRoute>
         } />
-        <Route path="/courses" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <CourseList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/courses/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <CourseForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/courses/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <CourseForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+
         <Route path="/finance" element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <MainLayout>

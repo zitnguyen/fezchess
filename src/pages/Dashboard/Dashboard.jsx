@@ -22,7 +22,7 @@ import studentService from "../../services/studentService";
 import classService from "../../services/classService";
 import enrollmentService from "../../services/enrollmentService";
 import financeService from "../../services/financeService";
-import "./Dashboard.css";
+
 
 const Dashboard = () => {
   const [totalStudents, setTotalStudents] = useState(0);
@@ -102,26 +102,25 @@ const Dashboard = () => {
       setRecentEnrollments(recentEnr.slice(0, 5));
 
 
-      // 3. Process Level Data
+      // 3. Process Level Data (Dynamic)
       if (students.length > 0) {
-        const levels = { 'Cơ bản': 0, 'Trung cấp': 0, 'Nâng cao': 0 };
+        const levelCounts = {};
         students.forEach(s => {
-           if (levels[s.skillLevel] !== undefined) {
-             levels[s.skillLevel]++;
-           } else {
-             levels['Cơ bản']++;
-           }
+           const lvl = s.skillLevel || 'Chưa xếp hạng';
+           levelCounts[lvl] = (levelCounts[lvl] || 0) + 1;
         });
 
-        const newLevelData = [
-            { name: "Cơ bản", value: levels['Cơ bản'], fill: "#2563EB" },
-            { name: "Trung cấp", value: levels['Trung cấp'], fill: "#4B5563" },
-            { name: "Nâng cao", value: levels['Nâng cao'], fill: "#E5E7EB" },
-        ].map(item => ({
-            ...item,
-            name: `${item.name} (${Math.round((item.value / students.length) * 100)}%)`
+        const COLORS = ['#2563EB', '#4F46E5', '#7C3AED', '#DB2777', '#EA580C', '#16A34A', '#FAAD14', '#52C41A'];
+
+        const newLevelData = Object.keys(levelCounts).map((key, index) => ({
+            name: `${key} (${Math.round((levelCounts[key] / students.length) * 100)}%)`,
+            value: levelCounts[key],
+            fill: COLORS[index % COLORS.length]
         }));
+        
         setLevelData(newLevelData);
+      } else {
+        setLevelData([]);
       }
 
       // 4. Fetch Classes
@@ -189,16 +188,7 @@ const Dashboard = () => {
       iconColor: "#9333ea",
       sub: "",
     },
-    {
-      label: "Đăng ký mới",
-      value: newEnrollmentsCount.toString(),
-      change: enrollmentGrowth,
-      type: enrollmentGrowth.includes('-') ? "decrease" : (enrollmentGrowth === '0%' || enrollmentGrowth === '+0%') ? "neutral" : "increase",
-      icon: UserPlus,
-      color: "#ffedd5",
-      iconColor: "#c2410c",
-      sub: "",
-    },
+
     {
       label: "Doanh thu tháng",
       value:
@@ -313,84 +303,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Bottom Section */}
-      <div className="bottom-section">
-        <div className="section-card" style={{ width: "100%" }}>
-          <div className="card-header-row">
-            <h3>Đăng ký mới gần đây (Tháng {new Date().getMonth() + 1})</h3>
-            <Link to="/students" className="view-all">
-              Xem tất cả
-            </Link>
-          </div>
-          <table className="simple-table">
-            <thead>
-              <tr>
-                <th>HỌC VIÊN</th>
-                <th>LỚP ĐĂNG KÝ</th>
-                <th>NGÀY ĐĂNG KÝ</th>
-                <th>TRẠNG THÁI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentEnrollments.length > 0 ? (
-                recentEnrollments.map((enr) => (
-                  <tr key={enr._id}>
-                    <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E0E7FF', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>
-                                {/* Access populated studentId.fullName */}
-                                {enr.studentId?.fullName ? enr.studentId.fullName.charAt(0).toUpperCase() : '?'}
-                            </div>
-                            <span style={{ fontWeight: 500, color: '#111827' }}>
-                                {enr.studentId?.fullName || "N/A"}
-                            </span>
-                        </div>
-                    </td>
-                    <td>
-                        <span style={{ 
-                            padding: '4px 10px', 
-                            background: '#F3F4F6', 
-                            color: '#6B7280', 
-                            borderRadius: '6px', 
-                            fontSize: '12px',
-                            fontWeight: 500
-                        }}>
-                             {/* Access populated classId.className */}
-                            {enr.classId?.className || "Chờ xếp lớp"}
-                        </span>
-                    </td>
-                    <td style={{ color: '#6B7280' }}>
-                        {enr.enrollmentDate ? new Date(enr.enrollmentDate).toLocaleDateString('vi-VN') : 'N/A'}
-                    </td>
-                    <td>
-                        <span style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            backgroundColor: enr.paymentStatus === 'paid' ? '#DEF7EC' : '#FFF3CD',
-                            color: enr.paymentStatus === 'paid' ? '#03543F' : '#997404',
-                            border: `1px solid ${enr.paymentStatus === 'paid' ? '#BCF0DA' : '#FCE96A'}`
-                        }}>
-                            {enr.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chờ thanh toán'}
-                        </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr style={{ height: "100px" }}>
-                  <td
-                    colSpan="4"
-                    style={{ textAlign: "center", color: "#9CA3AF" }}
-                  >
-                    Chưa có đăng ký mới trong tháng này.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Sections removed as per user request */}
+
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, BookOpen, Calendar, Wallet, ClipboardCheck, LogOut, UserPlus, CalendarRange } from 'lucide-react';
 import authService from '../../services/authService';
-import './Sidebar.css';
+
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();

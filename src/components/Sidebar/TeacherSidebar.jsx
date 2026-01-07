@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Calendar, Users, BarChart2, LogOut } from 'lucide-react';
 import authService from '../../services/authService';
-import './Sidebar.css'; // Use shared CSS
+
 
 const TeacherSidebar = () => {
   const user = authService.getCurrentUser();
