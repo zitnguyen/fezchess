@@ -119,39 +119,166 @@ const Schedule = () => {
         return days[date.getDay()];
     };
 
+    const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1); // 0 = Mon, 6 = Sun
+
+    // Auto-select today when week changes if today is in view
+    useEffect(() => {
+        const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+        const startOfView = daysInView[0];
+        const endOfView = daysInView[6];
+        const now = new Date();
+        
+        if (now >= startOfView && now <= endOfView) {
+             setSelectedDayIndex(todayIndex);
+        } else {
+             setSelectedDayIndex(0); // Default to Monday if today not in view
+        }
+    }, [currentDate]);
+
+
     return (
-        <div className="h-[calc(100vh-theme(spacing.24))] flex flex-col space-y-4">
+        <div className="h-[calc(100vh-theme(spacing.20))] md:h-[calc(100vh-theme(spacing.24))] flex flex-col space-y-3 md:space-y-4">
              {/* Header Section */}
-             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
-                <div>
-                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <CalendarIcon className="text-primary" size={24} />
-                        Lịch Học Viên
-                    </h1>
-                     <p className="text-sm text-gray-500 mt-1">Xem chi tiết lịch học của tất cả học viên trong tuần</p>
-                </div>
-                 <div className="flex items-center gap-3 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
-                     <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
-                        <ChevronLeft size={20}/>
+             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
+                <div className="flex items-center justify-between">
+                     <div>
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <CalendarIcon className="text-primary" size={24} />
+                            <span className="hidden leading-none md:block">Lịch Học Viên</span>
+                            <span className="md:hidden leading-none">Lịch Học</span>
+                        </h1>
+                        <p className="text-xs md:text-sm text-gray-500 mt-1 hidden md:block">Xem chi tiết lịch học của tất cả học viên</p>
+                     </div>
+                     <button 
+                        onClick={() => {
+                            setCurrentDate(new Date());
+                            const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+                            setSelectedDayIndex(todayIndex);
+                        }}
+                        className="md:hidden px-3 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-xs font-medium"
+                     >
+                         Hôm nay
                      </button>
-                      <h3 className="min-w-[160px] text-center font-semibold text-gray-800 text-sm select-none">
+                </div>
+
+                 <div className="flex items-center justify-between bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto">
+                     <button onClick={() => navigateWeek(-1)} className="p-1.5 md:p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
+                        <ChevronLeft size={18}/>
+                     </button>
+                      <h3 className="flex-1 text-center font-semibold text-gray-800 text-sm select-none px-2">
                          {formatDate(daysInView[0])} - {formatDate(daysInView[6])}
-                         <span className="text-xs font-normal text-gray-500 ml-2">({daysInView[0].getFullYear()})</span>
-                     </h3>
-                     <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
-                        <ChevronRight size={20}/>
+                         <span className="text-xs font-normal text-gray-500 ml-1">({daysInView[0].getFullYear()})</span>
+                      </h3>
+                     <button onClick={() => navigateWeek(1)} className="p-1.5 md:p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600">
+                        <ChevronRight size={18}/>
                      </button>
                  </div>
+                 
                  <button 
                     onClick={() => setCurrentDate(new Date())}
-                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-medium shadow-sm active:scale-95"
+                    className="hidden md:block px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-medium shadow-sm active:scale-95"
                  >
                      Hôm nay
                  </button>
             </div>
 
-            {/* Calendar Grid Container */}
-            <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-0">
+            {/* Mobile Day Selector (Horizontal Scroll) */}
+            <div className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-20 flex overflow-x-auto no-scrollbar py-2 px-1">
+                {daysInView.map((day, index) => {
+                    const isSelected = selectedDayIndex === index;
+                    const isToday = day.toDateString() === today.toDateString();
+                    return (
+                        <button
+                            key={index}
+                            onClick={() => setSelectedDayIndex(index)}
+                            className={`
+                                flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 mx-1 rounded-xl transition-all
+                                ${isSelected ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' : 'bg-transparent text-gray-600 hover:bg-gray-50'}
+                                ${isToday && !isSelected ? 'ring-1 ring-primary/50 bg-primary/5' : ''}
+                            `}
+                        >
+                            <span className={`text-[10px] uppercase font-bold tracking-wider mb-1 ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
+                                {getDayName(day).split(' ')[1] || 'CN'}
+                            </span>
+                            <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                                {day.getDate()}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Mobile Agenda View */}
+            <div className="md:hidden flex-1 overflow-y-auto bg-white rounded-xl shadow-sm border border-gray-200 pb-20">
+                 {loading ? (
+                    <div className="py-12 flex flex-col items-center justify-center text-gray-400">
+                        <Loader2 className="animate-spin mb-3 text-primary" size={32} />
+                        <span className="text-sm">Đang tải lịch học...</span>
+                    </div>
+                 ) : (
+                    <div className="divide-y divide-gray-100 p-4 space-y-4">
+                        {activeHours.map((hour) => {
+                            const selectedDate = daysInView[selectedDayIndex];
+                             const events = getEventsForCell(selectedDate, hour);
+                             
+                             if (events.length === 0) return null;
+
+                             return (
+                                <div key={hour} className="flex gap-4">
+                                     <div className="w-14 flex-shrink-0 flex flex-col items-center pt-2">
+                                        <span className="text-lg font-bold text-gray-900">{hour}:00</span>
+                                        <span className="text-xs text-gray-400">{hour}:45</span>
+                                        <div className="h-full w-0.5 bg-gray-100 mt-2 mb-[-1rem]"></div>
+                                     </div>
+                                     <div className="flex-1 space-y-3 pb-4">
+                                         {events.map(student => (
+                                             <div key={student._id} className="bg-white border text-sm border-l-4 border-l-primary/70 border-gray-200 rounded-lg p-3 shadow-sm">
+                                                 <div className="font-bold text-gray-800 text-base mb-1">
+                                                     {student.fullName}
+                                                 </div>
+                                                 <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
+                                                     <div className="flex items-center gap-1">
+                                                        <Users size={12} />
+                                                        <span>{student.skillLevel || 'Chưa xếp hạng'}</span>
+                                                     </div>
+                                                     <div className="flex items-center gap-1">
+                                                        <Clock size={12} />
+                                                        <span>45 phút</span>
+                                                     </div>
+                                                 </div>
+                                                 {student.teacherId && (
+                                                     <div className="flex items-center gap-2 bg-blue-50 px-2 py-1.5 rounded-md w-fit">
+                                                         <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-blue-600 shadow-sm">
+                                                             GV
+                                                         </div>
+                                                         <span className="text-xs font-medium text-blue-700">
+                                                             {student.teacherId.fullName || student.teacherId.username}
+                                                         </span>
+                                                     </div>
+                                                 )}
+                                             </div>
+                                         ))}
+                                     </div>
+                                </div>
+                             )
+                        })}
+                        
+                         {/* Empty State for Day */}
+                         {!loading && activeHours.every(h => getEventsForCell(daysInView[selectedDayIndex], h).length === 0) && (
+                            <div className="py-12 flex flex-col items-center justify-center text-center">
+                                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    <CalendarIcon className="text-gray-300" size={32} />
+                                </div>
+                                <h3 className="text-gray-900 font-medium mb-1">Không có lịch học</h3>
+                                <p className="text-gray-500 text-sm">Chưa có lớp nào được xếp vào ngày này.</p>
+                            </div>
+                        )}
+                    </div>
+                 )}
+            </div>
+
+            {/* Desktop Calendar Grid Container */}
+            <div className="hidden md:flex flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex-col min-h-0">
                 {/* Header Row */}
                 <div className="flex border-b border-gray-200 bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
                      {/* Empty Corner Cell for Time */}
@@ -252,7 +379,7 @@ const Schedule = () => {
                                     </div>
                                 </div>
                             ))}
-                            {/* Empty state if no active hours but loaded */}
+                             {/* Empty state if no active hours but loaded */}
                              {!loading && activeHours.length === 0 && (
                                 <div className="p-8 text-center text-gray-500">
                                     Không có lịch học nào để hiển thị.
@@ -278,9 +405,15 @@ const Schedule = () => {
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #94A3B8;
                 }
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none; /* IE and Edge */
+                    scrollbar-width: none; /* Firefox */
+                }
             `}</style>
         </div>
     );
 };
-
 export default Schedule;
