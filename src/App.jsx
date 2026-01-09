@@ -4,18 +4,18 @@ import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Admin Pages
-import Dashboard from './pages/admin/Dashboard/MainDashboard';
-import TeacherList from './pages/admin/Teachers/TeacherList';
-import TeacherForm from './pages/admin/Teachers/TeacherForm';
-import StudentList from './pages/admin/Students/StudentList';
-import StudentForm from './pages/admin/Students/StudentForm';
-import Finance from './pages/admin/Finance/Finance';
-import Attendance from './pages/admin/Attendance/Attendance';
-import EnrollmentList from './pages/admin/Enrollments/EnrollmentList';
-import EnrollmentForm from './pages/admin/Enrollments/EnrollmentForm';
-import Schedule from './pages/admin/Schedule/Schedule';
-import ParentList from './pages/admin/Parents/ParentList';
-import ParentForm from './pages/admin/Parents/ParentForm';
+import Dashboard from './pages/Admin/Dashboard/MainDashboard';
+import TeacherList from './pages/Admin/Teachers/TeacherList';
+import TeacherForm from './pages/Admin/Teachers/TeacherForm';
+import StudentList from './pages/Admin/Students/StudentList';
+import StudentForm from './pages/Admin/Students/StudentForm';
+import Finance from './pages/Admin/Finance/Finance';
+import Attendance from './pages/Admin/Attendance/Attendance';
+import EnrollmentList from './pages/Admin/Enrollments/EnrollmentList';
+import EnrollmentForm from './pages/Admin/Enrollments/EnrollmentForm';
+import Schedule from './pages/Admin/Schedule/Schedule';
+import ParentList from './pages/Admin/Parents/ParentList';
+import ParentForm from './pages/Admin/Parents/ParentForm';
 
 // Layouts
 import ParentLayout from './layouts/ParentLayout';
