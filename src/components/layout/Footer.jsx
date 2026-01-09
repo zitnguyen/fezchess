@@ -25,8 +25,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Nơi ươm mầm những kỳ thủ tương lai, phát triển tư duy logic và kỹ
-              năng giải quyết vấn đề cho trẻ em.
+              Nơi phát triển tư duy, bản lĩnh cho thế hệ trẻ.
             </p>
           </div>
 
@@ -59,15 +58,15 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-center gap-3 text-muted-foreground">
                 <PhoneIcon className="w-5 h-5 text-primary" />
-                <span>0123 456 789</span>
+                <span>0934 830 045</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <EnvelopeIcon className="w-5 h-5 text-primary" />
-                <span>info@zchess.vn</span>
+                <span>zchessvn@gmail.com</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <MapPinIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <span>123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh</span>
+                <span>1181/26 KDC Lê Văn Lương, xã Nhà Bè, TP. Hồ Chí Minh</span>
               </li>
             </ul>
           </div>
