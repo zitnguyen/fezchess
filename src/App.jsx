@@ -4,7 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Admin Pages
-import Dashboard from './pages/admin/Dashboard/Dashboard';
+import Dashboard from './pages/admin/AdminDashboard/AdminDashboard';
 import TeacherList from './pages/admin/Teachers/TeacherList';
 import TeacherForm from './pages/admin/Teachers/TeacherForm';
 import StudentList from './pages/admin/Students/StudentList';
