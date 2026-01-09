@@ -1,44 +1,61 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import Dashboard from './pages/Dashboard/Dashboard';
-import TeacherList from './pages/Teachers/TeacherList';
-import TeacherForm from './pages/Teachers/TeacherForm';
-import StudentList from './pages/Students/StudentList';
-import StudentForm from './pages/Students/StudentForm';
-import ClassList from './pages/Classes/ClassList';
-import ClassForm from './pages/Classes/ClassForm';
 
-import Finance from './pages/Finance/Finance';
-import Attendance from './pages/Attendance/Attendance';
-import EnrollmentList from './pages/Enrollments/EnrollmentList';
-import EnrollmentForm from './pages/Enrollments/EnrollmentForm';
-import Schedule from './pages/Schedule/Schedule';
-import ParentList from './pages/Parents/ParentList';
-import ParentForm from './pages/Parents/ParentForm';
+// Admin Pages
+import Dashboard from './pages/admin/Dashboard/Dashboard';
+import TeacherList from './pages/admin/Teachers/TeacherList';
+import TeacherForm from './pages/admin/Teachers/TeacherForm';
+import StudentList from './pages/admin/Students/StudentList';
+import StudentForm from './pages/admin/Students/StudentForm';
+import Finance from './pages/admin/Finance/Finance';
+import Attendance from './pages/admin/Attendance/Attendance';
+import EnrollmentList from './pages/admin/Enrollments/EnrollmentList';
+import EnrollmentForm from './pages/admin/Enrollments/EnrollmentForm';
+import Schedule from './pages/admin/Schedule/Schedule';
+import ParentList from './pages/admin/Parents/ParentList';
+import ParentForm from './pages/admin/Parents/ParentForm';
+
+// Layouts
 import ParentLayout from './layouts/ParentLayout';
-import ParentDashboard from './pages/ParentPortal/ParentDashboard';
-import ParentSchedule from './pages/ParentPortal/ParentSchedule';
 import TeacherLayout from './layouts/TeacherLayout';
-import TeacherDashboard from './pages/TeacherPortal/Dashboard/TeacherDashboard';
 import StudentLayout from './layouts/StudentLayout';
-import StudentDashboard from './pages/StudentPortal/Dashboard/StudentDashboard';
-import StudentSchedule from './pages/StudentPortal/Schedule/StudentSchedule';
-import StudentProfile from './pages/StudentPortal/Profile/StudentProfile';
+import PublicLayout from './components/layout/PublicLayout'; // Using the component version
 
+// Portal Pages
+import ParentDashboard from './pages/portal/Parent/ParentDashboard';
+import ParentSchedule from './pages/portal/Parent/ParentSchedule';
 
-import Login from './pages/Login/Login';
+import TeacherDashboard from './pages/portal/Teacher/Dashboard/TeacherDashboard';
+import TeachingLogList from './pages/portal/Teacher/Payroll/TeachingLogList';
+import AssessmentList from './pages/portal/Teacher/Assessment/AssessmentList';
 
+import StudentDashboard from './pages/portal/Student/Dashboard/StudentDashboard';
+import StudentSchedule from './pages/portal/Student/Schedule/StudentSchedule';
+import StudentProfile from './pages/portal/Student/Profile/StudentProfile';
+
+// Auth & Public
+import Login from './pages/auth/Login/Login';
+import HomePage from './pages/public/HomePage';
+import TestRegisterPage from './pages/public/TestRegisterPage';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/test-register" element={<TestRegisterPage />} />
+          <Route path="/courses" element={<div className="pt-20 text-center text-gray-500">Courses Page Coming Soon</div>} /> 
+          <Route path="/teachers" element={<div className="pt-20 text-center text-gray-500">Teachers Page Coming Soon</div>} />
+          <Route path="/contact" element={<div className="pt-20 text-center text-gray-500">Contact Page Coming Soon</div>} />
+        </Route>
+        
         <Route path="/login" element={<Login />} />
         
         {/* Admin Routes */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        
         <Route path="/dashboard" element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <MainLayout>
@@ -46,133 +63,26 @@ function App() {
             </MainLayout>
           </ProtectedRoute>
         } />
-        <Route path="/teachers" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <TeacherList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/teachers/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <TeacherForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/teachers/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <TeacherForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/students" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <StudentList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/students/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <StudentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/parents" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ParentList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/parents/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ParentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/parents/:id" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ParentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/students/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <StudentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/classes" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ClassList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/classes/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ClassForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/classes/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <ClassForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+        
+        <Route path="/teachers" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><TeacherList /></MainLayout></ProtectedRoute>} />
+        <Route path="/teachers/new" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><TeacherForm /></MainLayout></ProtectedRoute>} />
+        <Route path="/teachers/:id/edit" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><TeacherForm /></MainLayout></ProtectedRoute>} />
+        
+        <Route path="/students" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><StudentList /></MainLayout></ProtectedRoute>} />
+        <Route path="/students/new" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><StudentForm /></MainLayout></ProtectedRoute>} />
+        <Route path="/students/:id/edit" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><StudentForm /></MainLayout></ProtectedRoute>} />
+        
+        <Route path="/parents" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><ParentList /></MainLayout></ProtectedRoute>} />
+        <Route path="/parents/new" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><ParentForm /></MainLayout></ProtectedRoute>} />
+        <Route path="/parents/:id" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><ParentForm /></MainLayout></ProtectedRoute>} />
 
-        <Route path="/finance" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <Finance />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/attendance" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <Attendance />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/enrollments" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <EnrollmentList />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/schedule" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <Schedule />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/enrollments/new" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <EnrollmentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/enrollments/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <MainLayout>
-               <EnrollmentForm />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+        <Route path="/enrollments" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><EnrollmentList /></MainLayout></ProtectedRoute>} />
+        <Route path="/enrollments/new" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><EnrollmentForm /></MainLayout></ProtectedRoute>} />
+        <Route path="/enrollments/:id/edit" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><EnrollmentForm /></MainLayout></ProtectedRoute>} />
+
+        <Route path="/schedule" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><Schedule /></MainLayout></ProtectedRoute>} />
+        <Route path="/attendance" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><Attendance /></MainLayout></ProtectedRoute>} />
+        <Route path="/finance" element={<ProtectedRoute allowedRoles={['Admin']}><MainLayout><Finance /></MainLayout></ProtectedRoute>} />
 
         {/* Teacher Routes */}
         <Route path="/teacher" element={<Navigate to="/teacher/dashboard" replace />} />
@@ -181,7 +91,9 @@ function App() {
                 <TeacherLayout>
                     <Routes>
                         <Route path="dashboard" element={<TeacherDashboard />} />
-                        <Route path="*" element={<div>Teacher Page Coming Soon</div>} />
+                        <Route path="payroll" element={<TeachingLogList />} />
+                        <Route path="assessments" element={<AssessmentList />} />
+                        <Route path="*" element={<div className="p-10">Teacher Page Coming Soon</div>} />
                     </Routes>
                 </TeacherLayout>
             </ProtectedRoute>
@@ -195,7 +107,7 @@ function App() {
                     <Routes>
                         <Route path="dashboard" element={<ParentDashboard />} />
                         <Route path="schedule" element={<ParentSchedule />} />
-                        <Route path="*" element={<div>Parent Page Coming Soon</div>} />
+                        <Route path="*" element={<div className="p-10">Parent Page Coming Soon</div>} />
                     </Routes>
                 </ParentLayout>
             </ProtectedRoute>
@@ -210,13 +122,13 @@ function App() {
                         <Route path="dashboard" element={<StudentDashboard />} />
                         <Route path="schedule" element={<StudentSchedule />} />
                         <Route path="profile" element={<StudentProfile />} />
-                        <Route path="*" element={<div>Student Page Coming Soon</div>} />
+                        <Route path="*" element={<div className="p-10">Student Page Coming Soon</div>} />
                     </Routes>
                 </StudentLayout>
             </ProtectedRoute>
         } />
         
-        <Route path="*" element={<div>Coming Soon</div>} />
+        <Route path="*" element={<div className="p-20 text-center">Coming Soon</div>} />
       </Routes>
     </Router>
   );
